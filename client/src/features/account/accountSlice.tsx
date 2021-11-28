@@ -1,7 +1,7 @@
 import { createAsyncThunk, createSlice, isAnyOf } from "@reduxjs/toolkit";
 import { FieldValues } from "react-hook-form";
 import { toast } from "react-toastify";
-//import { history } from "../..";
+import { history } from "../..";
 import agent from "../../app/api/agent";
 import { User } from "../../app/models/user";
 import { setBasket } from "../basket/basketSlice";
@@ -57,12 +57,10 @@ export const accountSlice = createSlice({
         signOut: (state) => {
             state.user = null;
             localStorage.removeItem('user');
-            //history.push('/');
+            history.push('/');
         },
         setUser: (state, action) => {
-            let claims = JSON.parse(atob(action.payload.token.split('.')[1]));
-            let roles = claims['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
-            state.user = {...action.payload, roles: typeof(roles) === 'string' ? [roles] : roles};
+            state.user = action.payload;
         }
     },
     extraReducers: (builder => {
@@ -70,12 +68,10 @@ export const accountSlice = createSlice({
             state.user = null;
             localStorage.removeItem('user');
             toast.error('Session expired - please login again');
-            //history.push('/');
+            history.push('/');
         });
         builder.addMatcher(isAnyOf(signInUser.fulfilled, fetchCurrentUser.fulfilled), (state, action) => {
-            let claims = JSON.parse(atob(action.payload.token.split('.')[1]));
-            let roles = claims['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
-            state.user = {...action.payload, roles: typeof(roles) === 'string' ? [roles] : roles};
+            state.user = action.payload;
         });
         builder.addMatcher(isAnyOf(signInUser.rejected), (state, action) => {
             throw action.payload;
